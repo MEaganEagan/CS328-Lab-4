@@ -111,7 +111,7 @@ void loop() {
     // Flash left LED and left arrow sprite
     digitalWrite(ledLeftArrow, HIGH);
     lcd.clear();
-    lcd.setCursor(0, 0);
+    lcd.setCursor(0, 1);
     lcd.write(byte(0)); // Display left arrow
     delay(500);
     digitalWrite(ledLeftArrow, LOW);
@@ -119,14 +119,14 @@ void loop() {
     // Flash right LED and right arrow sprite
     digitalWrite(ledRightArrow, HIGH);
     lcd.clear();
-    lcd.setCursor(15, 0);
+    lcd.setCursor(15, 1);
     lcd.write(byte(1)); // Display right arrow
     delay(500);
     digitalWrite(ledRightArrow, LOW);
   } else {
     // No LED, display custom sprite
     lcd.clear();
-    lcd.setCursor(7, 0);
+    lcd.setCursor(7, 1);
     lcd.write(byte(2)); // Display custom sprite
     delay(500);
   }
