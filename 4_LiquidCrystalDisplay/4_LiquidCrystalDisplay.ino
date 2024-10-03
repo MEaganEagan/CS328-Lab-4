@@ -1,5 +1,22 @@
+//************************************************************
+// Name: Matthew Eagan & Liam O'Brien
+// Course: CS328 - Embedded Systems
+// Assignment: Lab 4 - Liquid Crystal Display
+// Purpose: To utilize a Bluetooth connection to display
+//          animated sprites on a liquid crystal display
+// Due Date: 10-10-2024
+//************************************************************
+
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <SoftwareSerial.h>
+#define BLUETOOTH_BAUD_RATE 9600
+#define Rx 2
+#define Tx 3
+
+//Dsignate Rx and Tx pins for Bluetooth communications
+SoftwareSerial bluetooth(Rx, Tx);
+int bluetoothData;
 
 // Initialize the LCD at I2C address 0x27, 16 columns, and 2 rows
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -43,6 +60,13 @@ byte customSprite[8] = {
 };
 
 void setup() {
+  //Initialize Bluetooth pins for input and output
+  pinMode(Rx, INPUT);
+  pinMode(Tx, OUTPUT);
+
+  //Start Bluetooth receiver
+  bluetooth.begin(BLUETOOTH_BAUD_RATE);
+  
   // Set up the LCD with 16 columns and 2 rows
   lcd.begin(16, 2);
   lcd.backlight(); // Turn on the backlight
@@ -59,6 +83,24 @@ void setup() {
   // Initial display
   lcd.setCursor(0, 0);
   lcd.write(byte(2)); // Display custom sprite initially
+}
+
+String readCommand() {
+  String asciiData = "";
+
+  if (bluetooth.available()) {
+    lcd.clear();
+
+    while (bluetooth.available()) {
+      bluetoothData = bluetooth.read();
+
+      if (bluetooth != 13 && bluetoothData != 10) {
+        asciiData += (char)bluetoothData;
+      }
+    }
+  }
+
+  return asciiData;
 }
 
 void loop() {
