@@ -7,23 +7,31 @@
 // Due Date: 10-10-2024
 //************************************************************
 
+/***************Begin M.E.***************/
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <SoftwareSerial.h>
-#define BLUETOOTH_BAUD_RATE 9600
-#define Rx 2
-#define Tx 3
+#define BLUETOOTH_BAUD_RATE 38400
+#define Rx 14
+#define Tx 17
 
 //Dsignate Rx and Tx pins for Bluetooth communications
 SoftwareSerial bluetooth(Rx, Tx);
 int bluetoothData;
+/****************End M.E.****************/
 
 // Initialize the LCD at I2C address 0x27, 16 columns, and 2 rows
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
+/***************Begin M.E.***************/
+// Define LCD pins
+const int lcdLeftArrow = 9;
+const int lcdRightArrow = 10;
+
 // Define LED pins
-const int ledLeftArrow = 9;
-const int ledRightArrow = 10;
+const int ledLeft = 53;
+const int ledRight = 52;
+/****************End M.E.****************/
 
 // Custom character bitmaps (5x8 pixel format)
 byte leftArrow[8] = {
@@ -60,12 +68,14 @@ byte customSprite[8] = {
 };
 
 void setup() {
+  /***************Begin M.E.***************/
   //Initialize Bluetooth pins for input and output
   pinMode(Rx, INPUT);
   pinMode(Tx, OUTPUT);
 
   //Start Bluetooth receiver
   bluetooth.begin(BLUETOOTH_BAUD_RATE);
+  /****************End M.E.****************/
   
   // Set up the LCD with 16 columns and 2 rows
   lcd.begin(16, 2);
@@ -77,14 +87,15 @@ void setup() {
   lcd.createChar(2, customSprite);
 
   // Set LED pins as output
-  pinMode(ledLeftArrow, OUTPUT);
-  pinMode(ledRightArrow, OUTPUT);
+  pinMode(lcdLeftArrow, OUTPUT);
+  pinMode(lcdRightArrow, OUTPUT);
 
   // Initial display
   lcd.setCursor(0, 0);
   lcd.write(byte(2)); // Display custom sprite initially
 }
 
+/***************Begin M.E.***************/
 String readCommand() {
   String asciiData = "";
 
@@ -102,6 +113,7 @@ String readCommand() {
 
   return asciiData;
 }
+/****************End M.E.****************/
 
 void loop() {
   // Randomly decide which LED and arrow to flash
@@ -109,20 +121,20 @@ void loop() {
 
   if (randomLED == 1) {
     // Flash left LED and left arrow sprite
-    digitalWrite(ledLeftArrow, HIGH);
+    digitalWrite(lcdLeftArrow, HIGH);
     lcd.clear();
     lcd.setCursor(0, 1);
     lcd.write(byte(0)); // Display left arrow
     delay(500);
-    digitalWrite(ledLeftArrow, LOW);
+    // digitalWrite(lcdLeftArrow, LOW);
   } else if (randomLED == 2) {
     // Flash right LED and right arrow sprite
-    digitalWrite(ledRightArrow, HIGH);
+    digitalWrite(lcdRightArrow, HIGH);
     lcd.clear();
     lcd.setCursor(15, 1);
     lcd.write(byte(1)); // Display right arrow
     delay(500);
-    digitalWrite(ledRightArrow, LOW);
+    digitalWrite(lcdRightArrow, LOW);
   } else {
     // No LED, display custom sprite
     lcd.clear();
@@ -132,4 +144,12 @@ void loop() {
   }
 
   delay(500); // Wait before next cycle
+
+  if(bluetooth.available()){
+    while(bluetooth.available()){
+      char receivedchar = bluetooth.read();
+
+      Serial.println(receivedchar);
+    }
+  }
 }
