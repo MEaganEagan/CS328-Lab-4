@@ -12,12 +12,12 @@
 #include <LiquidCrystal_I2C.h>
 #include <SoftwareSerial.h>
 #define BLUETOOTH_BAUD_RATE 38400
-#define Rx 14
-#define Tx 17
+#define Rx 31
+#define Tx 32
 
 //Dsignate Rx and Tx pins for Bluetooth communications
 SoftwareSerial bluetooth(Rx, Tx);
-int bluetoothData;
+char bluetoothData;
 /****************End M.E.****************/
 
 // Initialize the LCD at I2C address 0x27, 16 columns, and 2 rows
@@ -68,6 +68,7 @@ byte customSprite[8] = {
 };
 
 void setup() {
+  Serial.begin(9600);
   /***************Begin M.E.***************/
   //Initialize Bluetooth pins for input and output
   pinMode(Rx, INPUT);
@@ -102,13 +103,21 @@ String readCommand() {
   if (bluetooth.available()) {
     lcd.clear();
 
+    digitalWrite(ledRight, HIGH);
     while (bluetooth.available()) {
       bluetoothData = bluetooth.read();
+
+      digitalWrite(ledLeft, HIGH);
 
       if (bluetooth != 13 && bluetoothData != 10) {
         asciiData += (char)bluetoothData;
       }
     }
+
+    delay(500);
+
+    digitalWrite(ledLeft, LOW);
+    digitalWrite(ledRight, LOW);
   }
 
   return asciiData;
@@ -116,7 +125,7 @@ String readCommand() {
 /****************End M.E.****************/
 
 void loop() {
-  // Randomly decide which LED and arrow to flash
+  //Randomly decide which LED and arrow to flash
   int randomLED = random(0, 3); // 0 = none, 1 = left, 2 = right
 
   if (randomLED == 1) {
@@ -145,11 +154,6 @@ void loop() {
 
   delay(500); // Wait before next cycle
 
-  if(bluetooth.available()){
-    while(bluetooth.available()){
-      char receivedchar = bluetooth.read();
-
-      Serial.println(receivedchar);
-    }
-  }
+  String receivedchar = readCommand();
+  Serial.println(receivedchar);
 }
